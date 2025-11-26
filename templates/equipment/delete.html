@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Delete Equipment - GreenGear{% endblock %}
+
+{% block content %}
+<div class="form-container" style="max-width: 500px; text-align: center;">
+    <h2 class="form-title">Delete Equipment</h2>
+    
+    <div style="background: #ffebee; padding: 30px; border-radius: var(--radius); margin-bottom: 30px;">
+        <i class="fas fa-exclamation-triangle" style="font-size: 3rem; color: #f44336; margin-bottom: 20px;"></i>
+        <h3 style="color: #f44336; margin-bottom: 15px;">Are you sure?</h3>
+        <p style="margin-bottom: 10px;">You are about to delete the equipment:</p>
+        <h4 style="color: var(--text-dark); margin-bottom: 20px;">"{{ equipment.name }}"</h4>
+        <p style="color: var(--text-light);">
+            This action cannot be undone. All booking history for this equipment will also be removed.
+        </p>
+    </div>
+
+    <form method="post" style="display: flex; gap: 15px; justify-content: center;">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-danger">
+            <i class="fas fa-trash"></i> Yes, Delete Equipment
+        </button>
+        <a href="{% url 'users:owner_dashboard' %}" class="btn btn-outline">Cancel</a>
+    </form>
+</div>
+{% endblock %}

@@ -1,0 +1,124 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ equipment.name }} - GreenGear{% endblock %}
+
+{% block content %}
+<div class="dashboard">
+    <!-- Breadcrumb -->
+    <div style="margin-bottom: 20px;">
+        <a href="{% url 'equipment:list' %}">Equipment</a> &gt; 
+        <span>{{ equipment.name }}</span>
+    </div>
+
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 40px; margin-bottom: 40px;">
+        <!-- Equipment Images -->
+        <div>
+            <div class="main-equipment-image" style="width: 100%; height: 400px; background: var(--border-color); border-radius: var(--radius); display: flex; align-items: center; justify-content: center; margin-bottom: 15px; overflow: hidden;">
+                {% if equipment.image %}
+                <img src="{{ equipment.image.url }}" alt="{{ equipment.name }}" style="width: 100%; height: 100%; object-fit: cover;">
+                {% else %}
+                <i class="fas fa-{{ equipment.category }}" style="font-size: 4rem; color: #666;"></i>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Equipment Details -->
+        <div>
+            <h1 style="margin-bottom: 10px;">{{ equipment.name }}</h1>
+            <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 20px;">
+                <span style="background: var(--primary-color); color: white; padding: 5px 15px; border-radius: 20px; font-size: 0.8rem; text-transform: capitalize;">
+                    {{ equipment.get_category_display }}
+                </span>
+                <span style="color: {% if is_available %}#4caf50{% else %}#f44336{% endif %}; font-weight: bold;">
+                    {% if is_available %}Available{% else %}Not Available{% endif %}
+                </span>
+            </div>
+
+            <div style="font-size: 2rem; font-weight: bold; color: var(--primary-color); margin-bottom: 20px;">
+                {% if equipment.rent_per_day %}₹{{ equipment.rent_per_day }}/day{% endif %}
+                {% if equipment.rent_per_hour %}<br><span style="font-size: 1.5rem;">or ₹{{ equipment.rent_per_hour }}/hour</span>{% endif %}
+            </div>
+
+            <div style="margin-bottom: 30px;">
+                <h3 style="margin-bottom: 10px;">Owner Information</h3>
+                <p><strong>Name:</strong> {{ equipment.owner.get_full_name|default:equipment.owner.username }}</p>
+                <p><strong>Location:</strong> {{ equipment.owner.location|default:"Not specified" }}</p>
+                <p><strong>Contact:</strong> 📞 ****** (Visible after booking approval)</p>
+            </div>
+
+            {% if user.is_authenticated %}
+                {% if user.role == 'farmer' %}
+                    {% if is_available %}
+                    <a href="{% url 'bookings:create' equipment.id %}" class="btn btn-primary" style="padding: 15px 30px; font-size: 1.1rem;">
+                        <i class="fas fa-calendar-check"></i> Book Now
+                    </a>
+                    {% else %}
+                    <button class="btn btn-secondary" style="padding: 15px 30px; font-size: 1.1rem;" disabled>
+                        <i class="fas fa-clock"></i> Currently Booked
+                    </button>
+                    <p style="color: var(--text-light); margin-top: 10px;">This equipment is currently rented by another farmer.</p>
+                    {% endif %}
+                {% endif %}
+            {% else %}
+            <a href="{% url 'users:login' %}" class="btn btn-primary" style="padding: 15px 30px; font-size: 1.1rem;">
+                Login to Book
+            </a>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Equipment Description -->
+    <div style="background: var(--white); padding: 30px; border-radius: var(--radius); margin-bottom: 30px; box-shadow: var(--shadow);">
+        <h2 style="margin-bottom: 20px;">Equipment Description</h2>
+        <p style="line-height: 1.8; margin-bottom: 20px; white-space: pre-line;">{{ equipment.description }}</p>
+    </div>
+
+    <!-- Rental Terms -->
+    <div style="background: var(--white); padding: 30px; border-radius: var(--radius); margin-bottom: 30px; box-shadow: var(--shadow);">
+        <h2 style="margin-bottom: 20px;">Rental Terms & Conditions</h2>
+        <ul style="line-height: 1.8;">
+            <li>Minimum rental period: 1 day or 1 hour</li>
+            <li>Payment: Cash on delivery only</li>
+            <li>Security deposit may be required (refundable)</li>
+            <li>Fuel charges: Extra as per actual usage</li>
+            <li>Delivery available within specified locations</li>
+            <li>Cancellation allowed up to 24 hours before rental</li>
+            <li>Equipment must be returned in the same condition</li>
+        </ul>
+    </div>
+
+    <!-- Similar Equipment -->
+    {% if similar_equipment %}
+    <div style="background: var(--white); padding: 30px; border-radius: var(--radius); box-shadow: var(--shadow);">
+        <h2 style="margin-bottom: 20px;">Similar Equipment</h2>
+        <div class="equipment-grid">
+            {% for equipment in similar_equipment %}
+            <div class="equipment-card">
+                <div class="equipment-image">
+                    {% if equipment.image %}
+                    <img src="{{ equipment.image.url }}" alt="{{ equipment.name }}" style="width: 100%; height: 100%; object-fit: cover;">
+                    {% else %}
+                    <i class="fas fa-{{ equipment.category }}" style="font-size: 3rem; color: #666;"></i>
+                    {% endif %}
+                </div>
+                <div class="equipment-content">
+                    <h3 class="equipment-title">{{ equipment.name }}</h3>
+                    <div class="equipment-meta">
+                        <span><i class="fas fa-user"></i> {{ equipment.owner.get_full_name|default:equipment.owner.username }}</span>
+                        <span><i class="fas fa-map-marker-alt"></i> {{ equipment.location }}</span>
+                    </div>
+                    <div class="equipment-price">
+                        {% if equipment.rent_per_day %}₹{{ equipment.rent_per_day }}/day{% endif %}
+                    </div>
+                    <div class="equipment-actions">
+                        <a href="{% url 'equipment:detail' equipment.id %}" class="btn btn-primary">View Details</a>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
