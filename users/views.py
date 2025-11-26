@@ -10,6 +10,15 @@ from bookings.models import Booking
 from django.contrib.auth import update_session_auth_hash
 from django.contrib.auth.forms import PasswordChangeForm
 
+from django.http import HttpResponse
+from django.core.management import call_command
+
+def run_migrations(request):
+    call_command('makemigrations')
+    call_command('migrate')
+    return HttpResponse("Migrations completed!")
+
+
 @login_required
 def change_password(request):
     if request.method == 'POST':
@@ -226,4 +235,5 @@ def owner_dashboard(request):
         'completed_bookings_count': completed_bookings.count(),
         'booking_requests': recent_booking_requests
     }
+
     return render(request, 'users/owner_dashboard.html', context)
