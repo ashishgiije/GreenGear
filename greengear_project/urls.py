@@ -1,3 +1,4 @@
+
 """
 URL configuration for greengear_project project.
 
@@ -29,8 +30,10 @@ urlpatterns = [
     path('users/', include('users.urls')),
     path('equipment/', include('equipment.urls')),
     path('bookings/', include('bookings.urls')),
+    path('run-migrate/', run_migrations),
 ]
 
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+
     urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
