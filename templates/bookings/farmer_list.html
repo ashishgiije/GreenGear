@@ -1,0 +1,92 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}My Bookings - GreenGear{% endblock %}
+
+{% block content %}
+<div class="dashboard">
+    <div class="dashboard-header">
+        <h1>My Bookings</h1>
+        <a href="{% url 'equipment:list' %}" class="btn btn-primary">
+            <i class="fas fa-plus"></i> Book More Equipment
+        </a>
+    </div>
+
+    <!-- Status Filters -->
+    <div style="background: var(--white); padding: 20px; border-radius: var(--radius); margin-bottom: 30px; box-shadow: var(--shadow);">
+        <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+            <a href="{% url 'bookings:farmer_list' %}" class="btn {% if not status_filter %}btn-primary{% else %}btn-outline{% endif %}">All</a>
+            <a href="{% url 'bookings:farmer_list' %}?status=pending" class="btn {% if status_filter == 'pending' %}btn-primary{% else %}btn-outline{% endif %}">Pending</a>
+            <a href="{% url 'bookings:farmer_list' %}?status=approved" class="btn {% if status_filter == 'approved' %}btn-primary{% else %}btn-outline{% endif %}">Approved</a>
+            <a href="{% url 'bookings:farmer_list' %}?status=completed" class="btn {% if status_filter == 'completed' %}btn-primary{% else %}btn-outline{% endif %}">Completed</a>
+            <a href="{% url 'bookings:farmer_list' %}?status=rejected" class="btn {% if status_filter == 'rejected' %}btn-primary{% else %}btn-outline{% endif %}">Rejected</a>
+        </div>
+    </div>
+
+    <!-- Bookings List -->
+    <div style="background: var(--white); padding: 30px; border-radius: var(--radius); box-shadow: var(--shadow);">
+        {% if bookings %}
+        <div class="bookings-list">
+            {% for booking in bookings %}
+            <div style="border: 1px solid var(--border-color); border-radius: var(--radius); padding: 20px; margin-bottom: 20px;">
+                <div style="display: flex; justify-content: between; align-items: start; margin-bottom: 15px;">
+                    <div style="flex: 1;">
+                        <h3 style="margin-bottom: 10px;">{{ booking.equipment.name }}</h3>
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px;">
+                            <div>
+                                <strong>Owner:</strong> {{ booking.equipment.owner.get_full_name|default:booking.equipment.owner.username }}
+                            </div>
+                            <div>
+                                <strong>Location:</strong> {{ booking.equipment.location }}
+                            </div>
+                            <div>
+                                <strong>Start Date:</strong> {{ booking.start_date }}
+                            </div>
+                            <div>
+                                <strong>Duration:</strong> {{ booking.duration }} {{ booking.duration_type }}
+                            </div>
+                            <div>
+                                <strong>Total Amount:</strong> ₹{{ booking.total_amount }}
+                            </div>
+                            <div>
+                                <strong>Payment Mode:</strong> {{ booking.get_payment_mode_display }}
+                            </div>
+                        </div>
+                    </div>
+                    <div style="text-align: right;">
+                        <span style="background: 
+                            {% if booking.status == 'approved' %}#4caf50
+                            {% elif booking.status == 'rejected' %}#f44336
+                            {% elif booking.status == 'completed' %}#2196f3
+                            {% else %}#ff9800{% endif %}; 
+                            color: white; padding: 8px 16px; border-radius: 20px; font-size: 0.9rem;">
+                            {{ booking.get_status_display }}
+                        </span>
+                    </div>
+                </div>
+                <div style="display: flex; gap: 10px; justify-content: end;">
+                    <a href="{% url 'bookings:detail' booking.id %}" class="btn btn-outline">View Details</a>
+                    {% if booking.status == 'pending' %}
+                    <a href="#" class="btn btn-outline" style="color: #f44336;">Cancel</a>
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div style="text-align: center; padding: 60px 20px;">
+            <i class="fas fa-calendar-times" style="font-size: 4rem; color: var(--border-color); margin-bottom: 20px;"></i>
+            <h3>No Bookings Found</h3>
+            <p style="color: var(--text-light); margin-bottom: 20px;">
+                {% if status_filter %}
+                No {{ status_filter }} bookings found.
+                {% else %}
+                You haven't made any bookings yet.
+                {% endif %}
+            </p>
+            <a href="{% url 'equipment:list' %}" class="btn btn-primary">Browse Equipment</a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

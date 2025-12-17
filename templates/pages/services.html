@@ -1,0 +1,59 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Our Services - GreenGear{% endblock %}
+
+{% block content %}
+<div class="dashboard">
+    <div class="dashboard-header">
+        <h1>Our Services</h1>
+    </div>
+
+    <div style="background: var(--white); padding: 40px; border-radius: var(--radius); margin-bottom: 30px; box-shadow: var(--shadow);">
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 30px;">
+            <div style="text-align: center; padding: 30px;">
+                <div style="background: var(--primary-light); color: white; width: 100px; height: 100px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; font-size: 2.5rem;">
+                    <i class="fas fa-tractor"></i>
+                </div>
+                <h3>Equipment Rental</h3>
+                <p>Rent farming equipment on daily or hourly basis. Wide range of tractors, sprayers, and harvesters available.</p>
+            </div>
+            
+            <div style="text-align: center; padding: 30px;">
+                <div style="background: var(--primary-light); color: white; width: 100px; height: 100px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; font-size: 2.5rem;">
+                    <i class="fas fa-tools"></i>
+                </div>
+                <h3>Maintenance Support</h3>
+                <p>Regular maintenance and repair services for all rented equipment to ensure optimal performance.</p>
+            </div>
+            
+            <!-- <div style="text-align: center; padding: 30px;">
+                <div style="background: var(--primary-light); color: white; width: 100px; height: 100px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; font-size: 2.5rem;">
+                    <i class="fas fa-truck"></i>
+                </div>
+                <h3>Delivery Service</h3>
+                <p>We provide equipment delivery and pickup services within specified areas for your convenience.</p>
+            </div> -->
+            
+            <div style="text-align: center; padding: 30px;">
+                <div style="background: var(--primary-light); color: white; width: 100px; height: 100px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; font-size: 2.5rem;">
+                    <i class="fas fa-headset"></i>
+                </div>
+                <h3>24/7 Support</h3>
+                <p>Round-the-clock customer support to help you with any issues or queries regarding equipment rental.</p>
+            </div>
+        </div>
+    </div>
+
+    <div style="background: var(--primary-color); color: white; padding: 40px; border-radius: var(--radius); text-align: center;">
+        <h2 style="margin-bottom: 20px;">Ready to Get Started?</h2>
+        <p style="margin-bottom: 30px; font-size: 1.1rem;">
+            Join thousands of farmers and equipment owners who are already benefiting from GreenGear.
+        </p>
+        <div style="display: flex; gap: 20px; justify-content: center; flex-wrap: wrap;">
+            <a href="{% url 'users:register_farmer' %}" class="btn btn-secondary">Register as Farmer</a>
+            <a href="{% url 'users:register_owner' %}" class="btn btn-outline" style="border-color: white; color: white;">Register as Owner</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

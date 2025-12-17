@@ -1,0 +1,166 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Booking Details - GreenGear{% endblock %}
+
+{% block content %}
+<div class="dashboard">
+    <div class="dashboard-header">
+        <h1>Booking Details</h1>
+        {% if user.role == 'farmer' %}
+        <a href="{% url 'bookings:farmer_list' %}" class="btn btn-outline">
+            <i class="fas fa-arrow-left"></i> Back to My Bookings
+        </a>
+        {% else %}
+        <a href="{% url 'bookings:owner_list' %}" class="btn btn-outline">
+            <i class="fas fa-arrow-left"></i> Back to Booking Requests
+        </a>
+        {% endif %}
+    </div>
+
+    <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 40px;">
+        <!-- Booking Details -->
+        <div style="background: var(--white); padding: 30px; border-radius: var(--radius); box-shadow: var(--shadow);">
+            <div style="display: flex; justify-content: between; align-items: center; margin-bottom: 30px; padding-bottom: 20px; border-bottom: 1px solid var(--border-color);">
+                <h2 style="margin: 0; color: var(--primary-color);">Booking #{{ booking.id }}</h2>
+                <span style="background: 
+                    {% if booking.status == 'approved' %}#4caf50
+                    {% elif booking.status == 'rejected' %}#f44336
+                    {% elif booking.status == 'completed' %}#2196f3
+                    {% else %}#ff9800{% endif %}; 
+                    color: white; padding: 10px 20px; border-radius: 20px; font-size: 0.9rem; font-weight: bold;">
+                    {{ booking.get_status_display }}
+                </span>
+            </div>
+
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 25px; margin-bottom: 30px;">
+                <div>
+                    <h4 style="margin-bottom: 10px; color: var(--text-dark);">Equipment Information</h4>
+                    <p><strong>Name:</strong> {{ booking.equipment.name }}</p>
+                    <p><strong>Category:</strong> {{ booking.equipment.get_category_display }}</p>
+                    <p><strong>Location:</strong> {{ booking.equipment.location }}</p>
+                </div>
+                
+                <div>
+                    <h4 style="margin-bottom: 10px; color: var(--text-dark);">
+                        {% if user.role == 'farmer' %}Owner Information{% else %}Farmer Information{% endif %}
+                    </h4>
+                    {% if user.role == 'farmer' %}
+                    <p><strong>Name:</strong> {{ booking.equipment.owner.get_full_name|default:booking.equipment.owner.username }}</p>
+                    <p><strong>Phone:</strong> {{ booking.equipment.owner.phone|default:"Not provided" }}</p>
+                    <p><strong>Location:</strong> {{ booking.equipment.owner.location|default:"Not provided" }}</p>
+                    {% else %}
+                    <p><strong>Name:</strong> {{ booking.farmer.get_full_name|default:booking.farmer.username }}</p>
+                    <p><strong>Phone:</strong> {{ booking.farmer.phone|default:"Not provided" }}</p>
+                    <p><strong>Location:</strong> {{ booking.farmer.location|default:"Not provided" }}</p>
+                    {% endif %}
+                </div>
+                
+                <div>
+                    <h4 style="margin-bottom: 10px; color: var(--text-dark);">Booking Details</h4>
+                    <p><strong>Start Date:</strong> {{ booking.start_date }}</p>
+                    <p><strong>Duration:</strong> {{ booking.duration }} {{ booking.duration_type }}</p>
+                    <p><strong>Total Amount:</strong> ₹{{ booking.total_amount }}</p>
+                    <p><strong>Payment Mode:</strong> {{ booking.get_payment_mode_display }}</p>
+                </div>
+            </div>
+
+            <!-- Timeline -->
+            <div>
+                <h4 style="margin-bottom: 20px; color: var(--text-dark);">Booking Timeline</h4>
+                <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 30px; flex-wrap: wrap;">
+                    <div style="text-align: center;">
+                        <div style="background: #4caf50; color: white; width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 8px;">
+                            <i class="fas fa-check"></i>
+                        </div>
+                        <small>Request Sent</small>
+                        <br>
+                        <small style="color: var(--text-light);">{{ booking.created_at|date:"M d" }}</small>
+                    </div>
+                    
+                    <div style="flex: 1; height: 2px; background: 
+                        {% if booking.status != 'pending' %}#4caf50{% else %}#e0e0e0{% endif %};">
+                    </div>
+                    
+                    <div style="text-align: center;">
+                        <div style="background: {% if booking.status != 'pending' %}#4caf50{% else %}#e0e0e0{% endif %}; 
+                            color: white; width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 8px;">
+                            <i class="fas fa-user-check"></i>
+                        </div>
+                        <small>Owner Response</small>
+                        <br>
+                        <small style="color: var(--text-light);">
+                            {% if booking.status != 'pending' %}{{ booking.updated_at|date:"M d" }}{% else %}Pending{% endif %}
+                        </small>
+                    </div>
+                    
+                    <div style="flex: 1; height: 2px; background: 
+                        {% if booking.status == 'completed' or booking.status == 'approved' %}#4caf50{% else %}#e0e0e0{% endif %};">
+                    </div>
+                    
+                    <div style="text-align: center;">
+                        <div style="background: {% if booking.status == 'completed' %}#4caf50{% else %}#e0e0e0{% endif %}; 
+                            color: white; width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 8px;">
+                            <i class="fas fa-check-double"></i>
+                        </div>
+                        <small>Completed</small>
+                        <br>
+                        <small style="color: var(--text-light);">
+                            {% if booking.status == 'completed' %}{{ booking.updated_at|date:"M d" }}{% else %}Pending{% endif %}
+                        </small>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Action Panel -->
+        <div style="background: var(--white); padding: 30px; border-radius: var(--radius); box-shadow: var(--shadow); height: fit-content;">
+            <h3 style="margin-bottom: 20px;">Actions</h3>
+            
+            {% if user.role == 'owner' %}
+                {% if booking.status == 'pending' %}
+                <div style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px;">
+                    <a href="{% url 'bookings:update_status' booking.id 'approved' %}" class="btn btn-primary">
+                        <i class="fas fa-check"></i> Accept Booking
+                    </a>
+                    <a href="{% url 'bookings:update_status' booking.id 'rejected' %}" class="btn btn-outline" style="color: #f44336; border-color: #f44336;">
+                        <i class="fas fa-times"></i> Reject Booking
+                    </a>
+                </div>
+                {% elif booking.status == 'approved' %}
+                <div style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px;">
+                    <a href="{% url 'bookings:update_status' booking.id 'completed' %}" class="btn btn-secondary">
+                        <i class="fas fa-check-double"></i> Mark Complete
+                    </a>
+                    <a href="{% url 'bookings:update_status' booking.id 'cancelled' %}" class="btn btn-outline" style="color: #f44336; border-color: #f44336;">
+                        <i class="fas fa-times"></i> Cancel Booking
+                    </a>
+                </div>
+                {% endif %}
+            {% endif %}
+
+            <!-- Contact Information -->
+            <div style="border-top: 1px solid var(--border-color); padding-top: 20px;">
+                <h4 style="margin-bottom: 15px;">Contact Information</h4>
+                {% if user.role == 'farmer' %}
+                <p><strong>Owner:</strong> {{ booking.equipment.owner.get_full_name|default:booking.equipment.owner.username }}</p>
+                <p><strong>Phone:</strong> {{ booking.equipment.owner.phone|default:"Contact after approval" }}</p>
+                {% else %}
+                <p><strong>Farmer:</strong> {{ booking.farmer.get_full_name|default:booking.farmer.username }}</p>
+                <p><strong>Phone:</strong> {{ booking.farmer.phone|default:"Not provided" }}</p>
+                {% endif %}
+            </div>
+
+            <!-- Payment Information -->
+            <div style="border-top: 1px solid var(--border-color); padding-top: 20px;">
+                <h4 style="margin-bottom: 10px;">Payment Details</h4>
+                <p style="background: #e8f5e8; padding: 15px; border-radius: var(--radius); text-align: center;">
+                    <i class="fas fa-money-bill-wave" style="color: #2e7d32;"></i><br>
+                    <strong>Cash on Delivery</strong><br>
+                    <small>Pay ₹{{ booking.total_amount }} when equipment is delivered</small>
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

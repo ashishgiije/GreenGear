@@ -1,0 +1,124 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Manage Users - Admin{% endblock %}
+
+{% block content %}
+<div class="dashboard">
+    <div class="dashboard-header">
+        <h1>Manage Users</h1>
+        <div>
+            <a href="{% url 'users:create_user' %}" class="btn btn-primary">
+                <i class="fas fa-user-plus"></i> Add User
+            </a>
+            <a href="{% url 'users:admin_dashboard' %}" class="btn btn-outline">
+                <i class="fas fa-arrow-left"></i> Back to Dashboard
+            </a>
+        </div>
+    </div>
+
+    <!-- Search and Filters -->
+    <div style="background: var(--white); padding: 20px; border-radius: var(--radius); margin-bottom: 30px; box-shadow: var(--shadow);">
+        <form method="get" style="display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 15px;">
+            <input type="text" name="q" class="form-control" placeholder="Search by name, email, phone..." value="{{ search_query }}">
+            <select class="form-control" name="role">
+                <option value="">All Roles</option>
+                <option value="farmer" {% if role_filter == 'farmer' %}selected{% endif %}>Farmer</option>
+                <option value="owner" {% if role_filter == 'owner' %}selected{% endif %}>Owner</option>
+            </select>
+            <button type="submit" class="btn btn-primary">Search</button>
+        </form>
+    </div>
+
+    <!-- Users Table -->
+    <div style="background: var(--white); padding: 30px; border-radius: var(--radius); box-shadow: var(--shadow);">
+        <div style="overflow-x: auto;">
+            <table style="width: 100%; border-collapse: collapse;">
+                <thead>
+                    <tr style="background: var(--background-light);">
+                        <th style="padding: 15px; text-align: left; border-bottom: 2px solid var(--border-color);">User</th>
+                        <th style="padding: 15px; text-align: left; border-bottom: 2px solid var(--border-color);">Role</th>
+                        <th style="padding: 15px; text-align: left; border-bottom: 2px solid var(--border-color);">Contact</th>
+                        <th style="padding: 15px; text-align: left; border-bottom: 2px solid var(--border-color);">Location</th>
+                        <th style="padding: 15px; text-align: left; border-bottom: 2px solid var(--border-color);">Joined</th>
+                        <th style="padding: 15px; text-align: left; border-bottom: 2px solid var(--border-color);">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for user in users %}
+                    <tr style="border-bottom: 1px solid var(--border-color);">
+                        <td style="padding: 15px;">
+                            <strong>{{ user.get_full_name|default:user.username }}</strong><br>
+                            <small style="color: var(--text-light);">{{ user.email }}</small>
+                        </td>
+                        <td style="padding: 15px;">
+                            <span style="background: {% if user.role == 'farmer' %}#2196f3{% else %}#4caf50{% endif %}; 
+                                color: white; padding: 5px 10px; border-radius: 15px; font-size: 0.8rem;">
+                                {{ user.get_role_display }}
+                            </span>
+                        </td>
+                        <td style="padding: 15px;">
+                            {{ user.phone|default:"Not provided" }}
+                        </td>
+                        <td style="padding: 15px;">
+                            {{ user.location|default:"Not provided" }}
+                        </td>
+                        <td style="padding: 15px;">
+                            {{ user.date_joined|date:"M d, Y" }}
+                        </td>
+                        <td style="padding: 15px;">
+                            <div style="display: flex; gap: 5px;">
+                                <a href="{% url 'users:edit_user' user.id %}" class="btn btn-outline" style="padding: 5px 10px; font-size: 0.8rem;">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                                <a href="{% url 'users:delete_user' user.id %}" class="btn btn-outline" style="padding: 5px 10px; font-size: 0.8rem; color: #f44336; border-color: #f44336;">
+                                    <i class="fas fa-trash"></i>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6" style="padding: 40px; text-align: center; color: var(--text-light);">
+                            No users found.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        
+        <!-- Pagination -->
+        <div style="display: flex; justify-content: center; margin-top: 30px; gap: 10px;">
+            <button class="btn btn-outline">Previous</button>
+            <button class="btn btn-primary">1</button>
+            <button class="btn btn-outline">2</button>
+            <button class="btn btn-outline">3</button>
+            <button class="btn btn-outline">Next</button>
+        </div>
+    </div>
+</div>
+
+<style>
+@media (max-width: 768px) {
+    .dashboard-header {
+        flex-direction: column;
+        gap: 15px;
+        text-align: center;
+    }
+    
+    .dashboard-header > div {
+        flex-direction: column;
+        gap: 10px;
+    }
+    
+    table {
+        font-size: 0.9rem;
+    }
+    
+    th, td {
+        padding: 10px !important;
+    }
+}
+</style>
+{% endblock %}

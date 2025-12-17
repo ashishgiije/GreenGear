@@ -1,0 +1,188 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Admin Dashboard - GreenGear{% endblock %}
+
+{% block content %}
+<div class="dashboard">
+    <div class="dashboard-header">
+        <h1>Admin Dashboard</h1>
+        <div style="display: flex; gap: 10px;">
+            <a href="{% url 'users:manage_users' %}" class="btn btn-primary">
+                <i class="fas fa-users"></i> Manage Users
+            </a>
+            <a href="{% url 'equipment:manage_all' %}" class="btn btn-secondary">
+                <i class="fas fa-tractor"></i> Manage Equipment
+            </a>
+            <a href="{% url 'bookings:manage_all' %}" class="btn btn-outline">
+                <i class="fas fa-list"></i> All Bookings
+            </a>
+        </div>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="dashboard-stats">
+        <div class="stat-card">
+            <div class="stat-number">{{ total_users }}</div>
+            <div class="stat-label">Total Users</div>
+            <div style="font-size: 0.9rem; color: var(--text-light); margin-top: 5px;">
+                Farmers: {{ farmer_count }} | Owners: {{ owner_count }}
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number">{{ total_equipment }}</div>
+            <div class="stat-label">Total Equipment</div>
+            <div style="font-size: 0.9rem; color: var(--text-light); margin-top: 5px;">
+                Available: {{ available_equipment }}
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number">{{ total_bookings }}</div>
+            <div class="stat-label">Total Bookings</div>
+            <div style="font-size: 0.9rem; color: var(--text-light); margin-top: 5px;">
+                Active: {{ active_bookings }}
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number">₹{{ total_revenue }}</div>
+            <div class="stat-label">Total Revenue</div>
+            <div style="font-size: 0.9rem; color: var(--text-light); margin-top: 5px;">
+                Completed: {{ completed_bookings }}
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Activities -->
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-top: 40px;">
+        <!-- Recent Users -->
+        <div style="background: var(--white); padding: 30px; border-radius: var(--radius); box-shadow: var(--shadow);">
+            <h3 style="margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center;">
+                <span>Recent Users</span>
+                <a href="{% url 'users:manage_users' %}" class="btn btn-outline" style="font-size: 0.9rem;">View All</a>
+            </h3>
+            <div class="recent-list">
+                {% for user in recent_users %}
+                <div style="display: flex; justify-content: space-between; align-items: center; padding: 15px; border-bottom: 1px solid var(--border-color);">
+                    <div>
+                        <strong>{{ user.get_full_name|default:user.username }}</strong>
+                        <div style="color: var(--text-light); font-size: 0.9rem;">
+                            {{ user.email }} • {{ user.get_role_display }}
+                        </div>
+                    </div>
+                    <div>
+                        <span style="background: {% if user.role == 'farmer' %}#2196f3{% else %}#4caf50{% endif %}; 
+                            color: white; padding: 5px 10px; border-radius: 15px; font-size: 0.8rem;">
+                            {{ user.get_role_display }}
+                        </span>
+                    </div>
+                </div>
+                {% empty %}
+                <p style="text-align: center; color: var(--text-light); padding: 20px;">No users found.</p>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Recent Equipment -->
+        <div style="background: var(--white); padding: 30px; border-radius: var(--radius); box-shadow: var(--shadow);">
+            <h3 style="margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center;">
+                <span>Recent Equipment</span>
+                <a href="{% url 'equipment:manage_all' %}" class="btn btn-outline" style="font-size: 0.9rem;">View All</a>
+            </h3>
+            <div class="recent-list">
+                {% for equipment in recent_equipment %}
+                <div style="display: flex; justify-content: space-between; align-items: center; padding: 15px; border-bottom: 1px solid var(--border-color);">
+                    <div style="flex: 1;">
+                        <strong>{{ equipment.name }}</strong>
+                        <div style="color: var(--text-light); font-size: 0.9rem;">
+                            {{ equipment.owner.get_full_name|default:equipment.owner.username }} • ₹{{ equipment.rent_per_day }}/day
+                        </div>
+                    </div>
+                    <div style="text-align: right;">
+                        <span style="background: {% if equipment.availability %}#4caf50{% else %}#f44336{% endif %}; 
+                            color: white; padding: 5px 10px; border-radius: 15px; font-size: 0.8rem;">
+                            {% if equipment.availability %}Available{% else %}Booked{% endif %}
+                        </span>
+                    </div>
+                </div>
+                {% empty %}
+                <p style="text-align: center; color: var(--text-light); padding: 20px;">No equipment found.</p>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Bookings -->
+    <div style="background: var(--white); padding: 30px; border-radius: var(--radius); box-shadow: var(--shadow); margin-top: 30px;">
+        <h3 style="margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center;">
+            <span>Recent Bookings</span>
+            <a href="{% url 'bookings:manage_all' %}" class="btn btn-outline" style="font-size: 0.9rem;">View All</a>
+        </h3>
+        <div class="recent-list">
+            {% for booking in recent_bookings %}
+            <div style="display: flex; justify-content: space-between; align-items: center; padding: 15px; border-bottom: 1px solid var(--border-color);">
+                <div style="flex: 1;">
+                    <strong>{{ booking.equipment.name }}</strong>
+                    <div style="color: var(--text-light); font-size: 0.9rem;">
+                        {{ booking.farmer.get_full_name|default:booking.farmer.username }} • {{ booking.start_date }} • ₹{{ booking.total_amount }}
+                    </div>
+                </div>
+                <div style="text-align: right;">
+                    <span style="background: 
+                        {% if booking.status == 'approved' %}#4caf50
+                        {% elif booking.status == 'rejected' %}#f44336
+                        {% elif booking.status == 'completed' %}#2196f3
+                        {% else %}#ff9800{% endif %}; 
+                        color: white; padding: 5px 10px; border-radius: 15px; font-size: 0.8rem;">
+                        {{ booking.get_status_display }}
+                    </span>
+                </div>
+            </div>
+            {% empty %}
+            <p style="text-align: center; color: var(--text-light); padding: 20px;">No bookings found.</p>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div style="background: var(--white); padding: 30px; border-radius: var(--radius); box-shadow: var(--shadow); margin-top: 40px;">
+        <h3 style="margin-bottom: 20px;">Quick Actions</h3>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px;">
+            <a href="{% url 'users:create_user' %}" class="btn btn-primary" style="padding: 20px; text-align: center;">
+                <i class="fas fa-user-plus" style="font-size: 2rem; margin-bottom: 10px;"></i><br>
+                Add New User
+            </a>
+            <a href="{% url 'equipment:add' %}" class="btn btn-secondary" style="padding: 20px; text-align: center;">
+                <i class="fas fa-plus" style="font-size: 2rem; margin-bottom: 10px;"></i><br>
+                Add Equipment
+            </a>
+            <a href="/admin/" class="btn btn-outline" style="padding: 20px; text-align: center;" target="_blank">
+                <i class="fas fa-cog" style="font-size: 2rem; margin-bottom: 10px;"></i><br>
+                Django Admin
+            </a>
+            <a href="{% url 'users:manage_categories' %}" class="btn btn-outline" style="padding: 20px; text-align: center;">
+                <i class="fas fa-tags" style="font-size: 2rem; margin-bottom: 10px;"></i><br>
+                Manage Categories
+            </a>
+        </div>
+    </div>
+</div>
+
+<style>
+@media (max-width: 768px) {
+    .dashboard-header {
+        flex-direction: column;
+        gap: 15px;
+        text-align: center;
+    }
+    
+    .dashboard-header > div {
+        flex-direction: column;
+        gap: 10px;
+    }
+    
+    .dashboard > div:nth-child(2) {
+        grid-template-columns: 1fr;
+    }
+}
+</style>
+{% endblock %}

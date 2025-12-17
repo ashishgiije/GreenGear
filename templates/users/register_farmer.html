@@ -1,0 +1,106 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Register as Farmer - GreenGear{% endblock %}
+
+{% block content %}
+<div class="form-container">
+    <h2 class="form-title">Register as Farmer</h2>
+    
+    <form method="post" id="farmerRegisterForm">
+        {% csrf_token %}
+        
+        <div class="form-group">
+            <label class="form-label" for="name">Full Name *</label>
+            <input type="text" class="form-control" id="name" name="name" required 
+                   pattern="[A-Za-z\s]{3,50}" 
+                   title="Please enter only letters and spaces (3-50 characters)">
+            <small style="color: var(--text-light);">Only letters and spaces allowed (3-50 characters)</small>
+            <div id="nameError" style="color: #f44336; font-size: 0.9rem; display: none;"></div>
+        </div>
+        
+        <div class="form-group">
+            <label class="form-label" for="phone">Phone Number (10 digits) *</label>
+            <input type="tel" class="form-control" id="phone" name="phone" pattern="[0-9]{10}" required>
+            <small style="color: var(--text-light);">10-digit phone number only</small>
+        </div>
+        
+        <div class="form-group">
+            <label class="form-label" for="email">Email *</label>
+            <input type="email" class="form-control" id="email" name="email" required>
+        </div>
+        
+        <div class="form-group">
+            <label class="form-label" for="password">Password *</label>
+            <input type="password" class="form-control" id="password" name="password" required minlength="6">
+            <small style="color: var(--text-light);">Minimum 6 characters</small>
+        </div>
+        
+        <div class="form-group">
+            <label class="form-label" for="location">Location *</label>
+            <input type="text" class="form-control" id="location" name="location" required>
+        </div>
+        
+        <button type="submit" class="btn btn-primary" style="width: 100%;">Register as Farmer</button>
+    </form>
+    
+    <div style="text-align: center; margin-top: 20px;">
+        <p>Already have an account? <a href="{% url 'users:login' %}">Login here</a></p>
+        <p>Want to register as Equipment Owner? <a href="{% url 'users:register_owner' %}">Click here</a></p>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('farmerRegisterForm');
+    const nameInput = document.getElementById('name');
+    const nameError = document.getElementById('nameError');
+    
+    // Real-time name validation
+    nameInput.addEventListener('input', function() {
+        validateName(this.value);
+    });
+    
+    // Form submission validation
+    form.addEventListener('submit', function(e) {
+        if (!validateName(nameInput.value)) {
+            e.preventDefault();
+            nameError.style.display = 'block';
+            nameError.textContent = 'Please enter a valid name (letters and spaces only, 3-50 characters)';
+            nameInput.focus();
+        }
+    });
+    
+    function validateName(name) {
+        const nameRegex = /^[A-Za-z\s]{3,50}$/;
+        const isValid = nameRegex.test(name.trim());
+        
+        if (isValid) {
+            nameError.style.display = 'none';
+            nameInput.style.borderColor = 'var(--border-color)';
+        } else {
+            nameError.style.display = 'block';
+            nameInput.style.borderColor = '#f44336';
+        }
+        
+        return isValid;
+    }
+    
+    // Phone number validation
+    const phoneInput = document.getElementById('phone');
+    phoneInput.addEventListener('input', function() {
+        this.value = this.value.replace(/[^0-9]/g, '').slice(0, 10);
+    });
+});
+</script>
+
+<style>
+.form-control:invalid {
+    border-color: #f44336;
+}
+
+.form-control:valid {
+    border-color: #4caf50;
+}
+</style>
+{% endblock %}

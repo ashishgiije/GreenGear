@@ -1,0 +1,162 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Book Equipment - GreenGear{% endblock %}
+
+{% block content %}
+<div class="dashboard">
+    <div class="dashboard-header">
+        <h1>Book Equipment</h1>
+        <a href="{% url 'equipment:detail' equipment.id %}" class="btn btn-outline">
+            <i class="fas fa-arrow-left"></i> Back to Equipment
+        </a>
+    </div>
+
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 40px;">
+        <!-- Equipment Summary -->
+        <div style="background: var(--white); padding: 30px; border-radius: var(--radius); box-shadow: var(--shadow); height: fit-content;">
+            <h3 style="margin-bottom: 20px;">Equipment Details</h3>
+            
+            <div class="equipment-image" style="width: 100%; height: 200px; background: var(--border-color); border-radius: var(--radius); display: flex; align-items: center; justify-content: center; margin-bottom: 20px; overflow: hidden;">
+                {% if equipment.image %}
+                <img src="{{ equipment.image.url }}" alt="{{ equipment.name }}" style="width: 100%; height: 100%; object-fit: cover;">
+                {% else %}
+                <i class="fas fa-{{ equipment.category }}" style="font-size: 3rem; color: #666;"></i>
+                {% endif %}
+            </div>
+            
+            <h4 style="margin-bottom: 10px;">{{ equipment.name }}</h4>
+            <p style="color: var(--text-light); margin-bottom: 15px;">{{ equipment.description|truncatewords:30 }}</p>
+            
+            <div style="border-top: 1px solid var(--border-color); padding-top: 15px;">
+                <div style="display: flex; justify-content: between; margin-bottom: 8px;">
+                    <span>Owner:</span>
+                    <strong>{{ equipment.owner.get_full_name|default:equipment.owner.username }}</strong>
+                </div>
+                <div style="display: flex; justify-content: between; margin-bottom: 8px;">
+                    <span>Location:</span>
+                    <strong>{{ equipment.location }}</strong>
+                </div>
+                <div style="display: flex; justify-content: between; margin-bottom: 8px;">
+                    <span>Rent per Day:</span>
+                    <strong>₹{{ equipment.rent_per_day|default:"0" }}</strong>
+                </div>
+                <div style="display: flex; justify-content: between; margin-bottom: 8px;">
+                    <span>Rent per Hour:</span>
+                    <strong>₹{{ equipment.rent_per_hour|default:"0" }}</strong>
+                </div>
+            </div>
+        </div>
+
+        <!-- Booking Form -->
+        <div style="background: var(--white); padding: 30px; border-radius: var(--radius); box-shadow: var(--shadow);">
+            <h3 style="margin-bottom: 20px;">Booking Information</h3>
+            
+            <form method="post">
+                {% csrf_token %}
+                
+                <div class="form-group" style="margin-bottom: 20px;">
+                    <label class="form-label" for="start_date">Start Date</label>
+                    <input type="date" class="form-control" id="start_date" name="start_date" required 
+                           min="{{ min_date }}">
+                    <small style="color: var(--text-light);">Select the date when you need the equipment</small>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 15px; margin-bottom: 20px;">
+                    <div class="form-group">
+                        <label class="form-label" for="duration">Duration</label>
+                        <input type="number" class="form-control" id="duration" name="duration" min="1" required 
+                               oninput="calculateTotal()">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label" for="duration_type">Period</label>
+                        <select class="form-control" id="duration_type" name="duration_type" required 
+                                onchange="calculateTotal()">
+                            <option value="days">Days</option>
+                            <option value="hours">Hours</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Price Calculation -->
+                <div style="background: var(--background-light); padding: 20px; border-radius: var(--radius); margin-bottom: 20px;">
+                    <h4 style="margin-bottom: 15px;">Price Summary</h4>
+                    <div style="display: flex; justify-content: between; margin-bottom: 8px;">
+                        <span>Rate:</span>
+                        <strong id="rate_display">₹0 per day</strong>
+                    </div>
+                    <div style="display: flex; justify-content: between; margin-bottom: 8px;">
+                        <span>Duration:</span>
+                        <strong id="duration_display">0 days</strong>
+                    </div>
+                    <div style="display: flex; justify-content: between; font-size: 1.2rem; font-weight: bold; color: var(--primary-color); border-top: 1px solid var(--border-color); padding-top: 10px;">
+                        <span>Total Amount:</span>
+                        <strong id="total_amount">₹0</strong>
+                    </div>
+                </div>
+
+                <!-- Payment Information -->
+                <div style="background: #e8f5e8; padding: 20px; border-radius: var(--radius); margin-bottom: 20px;">
+                    <h4 style="margin-bottom: 10px; color: #2e7d32;">
+                        <i class="fas fa-money-bill-wave"></i> Payment Information
+                    </h4>
+                    <p style="margin: 0; color: #2e7d32;">
+                        <strong>Cash on Delivery Only</strong><br>
+                        Pay the total amount in cash when the equipment is delivered to you.<br>
+                        <B>NOTE : FARMER HAS TO DEPOSITE 5x AMOUNT OF RENT</B>
+                    </p>
+                </div>
+
+                <!-- Terms and Conditions -->
+                <div style="margin-bottom: 25px;">
+                    <label class="form-label" style="display: flex; align-items: start; gap: 10px; cursor: pointer;">
+                        <input type="checkbox" required style="margin-top: 3px;">
+                        <span>
+                            I agree to the <a href="#" style="color: var(--primary-color);">Terms and Conditions</a> 
+                            and understand that this is a booking request subject to owner approval.
+                        </span>
+                    </label>
+                </div>
+
+                <button type="submit" class="btn btn-primary" style="width: 100%; padding: 15px; font-size: 1.1rem;">
+                    <i class="fas fa-paper-plane"></i> Send Booking Request
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+// Set minimum date to today
+document.getElementById('start_date').min = new Date().toISOString().split('T')[0];
+
+function calculateTotal() {
+    const duration = parseInt(document.getElementById('duration').value) || 0;
+    const durationType = document.getElementById('duration_type').value;
+    
+    let rate = 0;
+    let rateDisplay = '';
+    
+    if (durationType === 'days') {
+        rate = {{ equipment.rent_per_day|default:0 }};
+        rateDisplay = '₹' + rate + ' per day';
+    } else {
+        rate = {{ equipment.rent_per_hour|default:0 }};
+        rateDisplay = '₹' + rate + ' per hour';
+    }
+    
+    const total = duration * rate;
+    
+    // Update displays
+    document.getElementById('rate_display').textContent = rateDisplay;
+    document.getElementById('duration_display').textContent = duration + ' ' + durationType;
+    document.getElementById('total_amount').textContent = '₹' + total;
+}
+
+// Initialize calculation on page load
+document.addEventListener('DOMContentLoaded', function() {
+    calculateTotal();
+});
+</script>
+{% endblock %}
