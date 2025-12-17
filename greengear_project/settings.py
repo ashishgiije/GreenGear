@@ -32,7 +32,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-56cfh)3!@p*x)fib$%9+wvm^=+=4(qjg=zvbx(#a&m4dks2^2q'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
 import os
 ALLOWED_HOSTS = [
@@ -159,4 +159,5 @@ LOGIN_URL = 'users:login'
 LOGIN_REDIRECT_URL = 'home'
 
 LOGOUT_REDIRECT_URL = 'home'
+
 
